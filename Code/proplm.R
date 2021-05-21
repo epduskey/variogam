@@ -1,7 +1,7 @@
 # Fit simple linear models to the maximum median estimates and variogram parameters
 
 # Created: May 19, 2021
-# Last modified: May 21, 2021
+# Last modified: May 21, 2021 by EPD
 
 # Set working directory
 setwd(paste(mypath, "variogam-main", sep = ""))
