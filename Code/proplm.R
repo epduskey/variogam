@@ -4,7 +4,7 @@
 # Last modified: May 21, 2021
 
 # Set working directory
-setwd(paste(mypath, "variogam", sep = ""))
+setwd(paste(mypath, "variogam-main", sep = ""))
 
 # Load packages
 library(mgcv)
