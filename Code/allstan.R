@@ -1,0 +1,573 @@
+# All cubic and thin plate spline simulations and estimations
+
+# Created: May 19, 2021
+# Last modified: May 21, 2021 by EPD
+
+# Set working directory
+setwd(paste(mypath, "variogam", sep = ""))
+
+# File layout:		
+#	I. Simulate ten one-dimensional data sets
+#	II. Cubic spline estimation
+#	III. Simulate ten two-dimensional data sets
+#	IV. Thin plate spline estimation
+
+# Source the necessary scripts
+
+# For simulating data from one- or two-dimensional Gaussian functions and adding correlated residuals
+source("Code/datsim.R")
+
+# To generate cubic and thin plate spline penalty matrices
+source("Code/omega.R")	
+
+# For cubic spline estimation	
+source("Code/cubestan.R")
+
+# For thin plate spline estimation
+source("Code/tpsstan.R")
+
+
+########## I. Simulate ten one-dimensional data sets ##########
+
+# Number of points
+n = 100	
+
+# Data scale	
+sc = 100	
+
+# x-coordinates	
+x = seq(1,100,length.out=n)*sc		
+xscale = scale(x)
+
+# Choose variogram parameters
+psill = 100
+rnge_one = abs(max(xscale)-min(xscale))/10
+nugget = 5
+
+# Choose sigma values for simulations
+sigma_one = seq(from = 1.0, to = 0.5, length.out = 10)
+
+# Set seed to replicate results in Duskey et al (2021)
+set.seed(3194)
+
+# Simulate data sets
+one1 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[1], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one2 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[2], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one3 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[3], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one4 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[4], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one5 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[5], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one6 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[6], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one7 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[7], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one8 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[8], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one9 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[9], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+one10 = data.frame(x = x, xs = xscale, y = gauss(mean(xscale), sigma_one[10], 10, xscale, xscale, psill, rnge_one, nugget, errvg = 0.1, type = "2d"))
+
+plot(y~xs, one1)
+plot(y~xs, one2)
+plot(y~xs, one3)
+plot(y~xs, one4)
+plot(y~xs, one5)
+plot(y~xs, one6)
+plot(y~xs, one7)
+plot(y~xs, one8)
+plot(y~xs, one9)
+plot(y~xs, one10)
+
+########## II. Cubic spline estimation ##########
+
+# Choose range for number of knots
+Ks = seq(2, 10)
+
+# Apply Bayesian estimation for each
+one1.stan2 = cubic(x = one1$xs, y = one1$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan2, file = "Output/Autocorrelation/one1stan2.rda")
+one1.stan3 = cubic(x = one1$xs, y = one1$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan3, file = "Output/Autocorrelation/one1stan3.rda")
+one1.stan4 = cubic(x = one1$xs, y = one1$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan4, file = "Output/Autocorrelation/one1stan4.rda")
+one1.stan5 = cubic(x = one1$xs, y = one1$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan5, file = "Output/Autocorrelation/one1stan5.rda")
+one1.stan6 = cubic(x = one1$xs, y = one1$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan6, file = "Output/Autocorrelation/one1stan6.rda")
+one1.stan7 = cubic(x = one1$xs, y = one1$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan7, file = "Output/Autocorrelation/one1stan7.rda")
+one1.stan8 = cubic(x = one1$xs, y = one1$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan8, file = "Output/Autocorrelation/one1stan8.rda")
+one1.stan9 = cubic(x = one1$xs, y = one1$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan9, file = "Output/Autocorrelation/one1stan9.rda")
+one1.stan10 = cubic(x = one1$xs, y = one1$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one1.stan10, file = "Output/Autocorrelation/one1stan10.rda")
+
+one2.stan2 = cubic(x = one2$xs, y = one2$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan2, file = "Output/Autocorrelation/one2stan2.rda")
+one2.stan3 = cubic(x = one2$xs, y = one2$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan3, file = "Output/Autocorrelation/one2stan3.rda")
+one2.stan4 = cubic(x = one2$xs, y = one2$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan4, file = "Output/Autocorrelation/one2stan4.rda")
+one2.stan5 = cubic(x = one2$xs, y = one2$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan5, file = "Output/Autocorrelation/one2stan5.rda")
+one2.stan6 = cubic(x = one2$xs, y = one2$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan6, file = "Output/Autocorrelation/one2stan6.rda")
+one2.stan7 = cubic(x = one2$xs, y = one2$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan7, file = "Output/Autocorrelation/one2stan7.rda")
+one2.stan8 = cubic(x = one2$xs, y = one2$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan8, file = "Output/Autocorrelation/one2stan8.rda")
+one2.stan9 = cubic(x = one2$xs, y = one2$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan9, file = "Output/Autocorrelation/one2stan9.rda")
+one2.stan10 = cubic(x = one2$xs, y = one2$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one2.stan10, file = "Output/Autocorrelation/one2stan10.rda")
+
+one3.stan2 = cubic(x = one3$xs, y = one3$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan2, file = "Output/Autocorrelation/one3stan2.rda")
+one3.stan3 = cubic(x = one3$xs, y = one3$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan3, file = "Output/Autocorrelation/one3stan3.rda")
+one3.stan4 = cubic(x = one3$xs, y = one3$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan4, file = "Output/Autocorrelation/one3stan4.rda")
+one3.stan5 = cubic(x = one3$xs, y = one3$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan5, file = "Output/Autocorrelation/one3stan5.rda")
+one3.stan6 = cubic(x = one3$xs, y = one3$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan6, file = "Output/Autocorrelation/one3stan6.rda")
+one3.stan7 = cubic(x = one3$xs, y = one3$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan7, file = "Output/Autocorrelation/one3stan7.rda")
+one3.stan8 = cubic(x = one3$xs, y = one3$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan8, file = "Output/Autocorrelation/one3stan8.rda")
+one3.stan9 = cubic(x = one3$xs, y = one3$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan9, file = "Output/Autocorrelation/one3stan9.rda")
+one3.stan10 = cubic(x = one3$xs, y = one3$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one3.stan10, file = "Output/Autocorrelation/one3stan10.rda")
+
+one4.stan2 = cubic(x = one4$xs, y = one4$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan2, file = "Output/Autocorrelation/one4stan2.rda")
+one4.stan3 = cubic(x = one4$xs, y = one4$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan3, file = "Output/Autocorrelation/one4stan3.rda")
+one4.stan4 = cubic(x = one4$xs, y = one4$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan4, file = "Output/Autocorrelation/one4stan4.rda")
+one4.stan5 = cubic(x = one4$xs, y = one4$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan5, file = "Output/Autocorrelation/one4stan5.rda")
+one4.stan6 = cubic(x = one4$xs, y = one4$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan6, file = "Output/Autocorrelation/one4stan6.rda")
+one4.stan7 = cubic(x = one4$xs, y = one4$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan7, file = "Output/Autocorrelation/one4stan7.rda")
+one4.stan8 = cubic(x = one4$xs, y = one4$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan8, file = "Output/Autocorrelation/one4stan8.rda")
+one4.stan9 = cubic(x = one4$xs, y = one4$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan9, file = "Output/Autocorrelation/one4stan9.rda")
+one4.stan10 = cubic(x = one4$xs, y = one4$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one4.stan10, file = "Output/Autocorrelation/one4stan10.rda")
+
+one5.stan2 = cubic(x = one5$xs, y = one5$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan2, file = "Output/Autocorrelation/one5stan2.rda")
+one5.stan3 = cubic(x = one5$xs, y = one5$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan3, file = "Output/Autocorrelation/one5stan3.rda")
+one5.stan4 = cubic(x = one5$xs, y = one5$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan4, file = "Output/Autocorrelation/one5stan4.rda")
+one5.stan5 = cubic(x = one5$xs, y = one5$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan5, file = "Output/Autocorrelation/one5stan5.rda")
+one5.stan6 = cubic(x = one5$xs, y = one5$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan6, file = "Output/Autocorrelation/one5stan6.rda")
+one5.stan7 = cubic(x = one5$xs, y = one5$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan7, file = "Output/Autocorrelation/one5stan7.rda")
+one5.stan8 = cubic(x = one5$xs, y = one5$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan8, file = "Output/Autocorrelation/one5stan8.rda")
+one5.stan9 = cubic(x = one5$xs, y = one5$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan9, file = "Output/Autocorrelation/one5stan9.rda")
+one5.stan10 = cubic(x = one5$xs, y = one5$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one5.stan10, file = "Output/Autocorrelation/one5stan10.rda")
+
+one6.stan2 = cubic(x = one6$xs, y = one6$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one6.stan2, file = "Output/Autocorrelation/one6stan2.rda")
+one6.stan3 = cubic(x = one6$xs, y = one6$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one6.stan3, file = "Output/Autocorrelation/one6stan3.rda")
+one6.stan4 = cubic(x = one6$xs, y = one6$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan4, file = "Output/Autocorrelation/one6stan4.rda")
+one6.stan5 = cubic(x = one6$xs, y = one6$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan5, file = "Output/Autocorrelation/one6stan5.rda")
+one6.stan6 = cubic(x = one6$xs, y = one6$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan6, file = "Output/Autocorrelation/one6stan6.rda")
+one6.stan7 = cubic(x = one6$xs, y = one6$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan7, file = "Output/Autocorrelation/one6stan7.rda")
+one6.stan8 = cubic(x = one6$xs, y = one6$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan8, file = "Output/Autocorrelation/one6stan8.rda")
+one6.stan9 = cubic(x = one6$xs, y = one6$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan9, file = "Output/Autocorrelation/one6stan9.rda")
+one6.stan10 = cubic(x = one6$xs, y = one6$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one6.stan10, file = "Output/Autocorrelation/one6stan10.rda")
+
+one7.stan2 = cubic(x = one7$xs, y = one7$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan2, file = "Output/Autocorrelation/one7stan2.rda")
+one7.stan3 = cubic(x = one7$xs, y = one7$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan3, file = "Output/Autocorrelation/one7stan3.rda")
+one7.stan4 = cubic(x = one7$xs, y = one7$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan4, file = "Output/Autocorrelation/one7stan4.rda")
+one7.stan5 = cubic(x = one7$xs, y = one7$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan5, file = "Output/Autocorrelation/one7stan5.rda")
+one7.stan6 = cubic(x = one7$xs, y = one7$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan6, file = "Output/Autocorrelation/one7stan6.rda")
+one7.stan7 = cubic(x = one7$xs, y = one7$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan7, file = "Output/Autocorrelation/one7stan7.rda")
+one7.stan8 = cubic(x = one7$xs, y = one7$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan8, file = "Output/Autocorrelation/one7stan8.rda")
+one7.stan9 = cubic(x = one7$xs, y = one7$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan9, file = "Output/Autocorrelation/one7stan9.rda")
+one7.stan10 = cubic(x = one7$xs, y = one7$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one7.stan10, file = "Output/Autocorrelation/one7stan10.rda")
+
+one8.stan2 = cubic(x = one8$xs, y = one8$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan2, file = "Output/Autocorrelation/one8stan2.rda")
+one8.stan3 = cubic(x = one8$xs, y = one8$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan3, file = "Output/Autocorrelation/one8stan3.rda")
+one8.stan4 = cubic(x = one8$xs, y = one8$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan4, file = "Output/Autocorrelation/one8stan4.rda")
+one8.stan5 = cubic(x = one8$xs, y = one8$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan5, file = "Output/Autocorrelation/one8stan5.rda")
+one8.stan6 = cubic(x = one8$xs, y = one8$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan6, file = "Output/Autocorrelation/one8stan6.rda")
+one8.stan7 = cubic(x = one8$xs, y = one8$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan7, file = "Output/Autocorrelation/one8stan7.rda")
+one8.stan8 = cubic(x = one8$xs, y = one8$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan8, file = "Output/Autocorrelation/one8stan8.rda")
+one8.stan9 = cubic(x = one8$xs, y = one8$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one8.stan9, file = "Output/Autocorrelation/one8stan9.rda")
+one8.stan10 = cubic(x = one8$xs, y = one8$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 1000, inc = 1000)
+save(object = one8.stan10, file = "Output/Autocorrelation/one8stan10.rda")
+
+one9.stan2 = cubic(x = one9$xs, y = one9$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan2, file = "Output/Autocorrelation/one9stan2.rda")
+one9.stan3 = cubic(x = one9$xs, y = one9$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan3, file = "Output/Autocorrelation/one9stan3.rda")
+one9.stan4 = cubic(x = one9$xs, y = one9$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan4, file = "Output/Autocorrelation/one9stan4.rda")
+one9.stan5 = cubic(x = one9$xs, y = one9$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan5, file = "Output/Autocorrelation/one9stan5.rda")
+one9.stan6 = cubic(x = one9$xs, y = one9$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan6, file = "Output/Autocorrelation/one9stan6.rda")
+one9.stan7 = cubic(x = one9$xs, y = one9$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan7, file = "Output/Autocorrelation/one9stan7.rda")
+one9.stan8 = cubic(x = one9$xs, y = one9$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan8, file = "Output/Autocorrelation/one9stan8.rda")
+one9.stan9 = cubic(x = one9$xs, y = one9$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan9, file = "Output/Autocorrelation/one9stan9.rda")
+one9.stan10 = cubic(x = one9$xs, y = one9$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one9.stan10, file = "Output/Autocorrelation/one9stan10.rda")
+
+one10.stan2 = cubic(x = one10$xs, y = one10$y, K = Ks[1], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan2, file = "Output/Autocorrelation/one10stan2.rda")
+one10.stan3 = cubic(x = one10$xs, y = one10$y, K = Ks[2], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan3, file = "Output/Autocorrelation/one10stan3.rda")
+one10.stan4 = cubic(x = one10$xs, y = one10$y, K = Ks[3], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan4, file = "Output/Autocorrelation/one10stan4.rda")
+one10.stan5 = cubic(x = one10$xs, y = one10$y, K = Ks[4], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan5, file = "Output/Autocorrelation/one10stan5.rda")
+one10.stan6 = cubic(x = one10$xs, y = one10$y, K = Ks[5], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan6, file = "Output/Autocorrelation/one10stan6.rda")
+one10.stan7 = cubic(x = one10$xs, y = one10$y, K = Ks[6], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan7, file = "Output/Autocorrelation/one10stan7.rda")
+one10.stan8 = cubic(x = one10$xs, y = one10$y, K = Ks[7], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan8, file = "Output/Autocorrelation/one10stan8.rda")
+one10.stan9 = cubic(x = one10$xs, y = one10$y, K = Ks[8], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = one10.stan9, file = "Output/Autocorrelation/one10stan9.rda")
+one10.stan10 = cubic(x = one10$xs, y = one10$y, K = Ks[9], offset = rep(0,n), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = one10.stan10, file = "Output/Autocorrelation/one10stan10.rda")
+
+# Save grouped objects
+one1.stan = list(one1.stan2, one1.stan3, one1.stan4, one1.stan5, one1.stan6, one1.stan7, one1.stan8, one1.stan9, one1.stan10)
+one2.stan = list(one2.stan2, one2.stan3, one2.stan4, one2.stan5, one2.stan6, one2.stan7, one2.stan8, one2.stan9, one2.stan10)
+one3.stan = list(one3.stan2, one3.stan3, one3.stan4, one3.stan5, one3.stan6, one3.stan7, one3.stan8, one3.stan9, one3.stan10)
+one4.stan = list(one4.stan2, one4.stan3, one4.stan4, one4.stan5, one4.stan6, one4.stan7, one4.stan8, one4.stan9, one4.stan10)
+one5.stan = list(one5.stan2, one5.stan3, one5.stan4, one5.stan5, one5.stan6, one5.stan7, one5.stan8, one5.stan9, one5.stan10)
+one6.stan = list(one6.stan2, one6.stan3, one6.stan4, one6.stan5, one6.stan6, one6.stan7, one6.stan8, one6.stan9, one6.stan10)
+one7.stan = list(one7.stan2, one7.stan3, one7.stan4, one7.stan5, one7.stan6, one7.stan7, one7.stan8, one7.stan9, one7.stan10)
+one8.stan = list(one8.stan2, one8.stan3, one8.stan4, one8.stan5, one8.stan6, one8.stan7, one8.stan8, one8.stan9, one8.stan10)
+one9.stan = list(one9.stan2, one9.stan3, one9.stan4, one9.stan5, one9.stan6, one9.stan7, one9.stan8, one9.stan9, one9.stan10)
+one10.stan = list(one10.stan2, one10.stan3, one10.stan4, one10.stan5, one10.stan6, one10.stan7, one10.stan8, one10.stan9, one10.stan10)
+
+save(object = one1.stan, file = "Output/Grouped/one1stan.rda")
+save(object = one2.stan, file = "Output/Grouped/one2stan.rda")
+save(object = one3.stan, file = "Output/Grouped/one3stan.rda")
+save(object = one4.stan, file = "Output/Grouped/one4stan.rda")
+save(object = one5.stan, file = "Output/Grouped/one5stan.rda")
+save(object = one6.stan, file = "Output/Grouped/one6stan.rda")
+save(object = one7.stan, file = "Output/Grouped/one7stan.rda")
+save(object = one8.stan, file = "Output/Grouped/one8stan.rda")
+save(object = one9.stan, file = "Output/Grouped/one9stan.rda")
+save(object = one10.stan, file = "Output/Grouped/one10stan.rda")
+
+
+########## III. Simulate ten two-dimensional data sets ##########
+
+# Number of unique x-values
+nx = 10
+
+# Number of unique y-values	
+ny = 10
+
+# Data scale	
+sc = 100
+
+# x-coordinates	
+x = rep(seq(1,100,length.out=nx), ny)*sc
+xscale = scale(x)
+
+# y-coordinates
+y = rep(seq(1,100,length.out=ny), each = nx)*sc
+yscale = scale(y)
+
+# All points
+xy = matrix(c(xscale,yscale), nrow = length(xscale), ncol = 2)
+xc = matrix(c(xscale,yscale), nrow = length(x), ncol = 2)
+
+# Choose variogram parameters
+psill = 100
+rnge_two = sqrt((max(xscale)-min(xscale))^2+(max(yscale)-min(yscale))^2)/10
+nugget = 5
+
+# Choose mean
+mu = matrix(0, nrow = 2, ncol = 1)
+
+# Choose sigma values for simulations
+sigma_two = seq(from = 0.5, to = 0.1, length.out = 10)
+
+# Set seed to replicate results in Duskey et al (2021)
+set.seed(9128)
+
+# Simulate data sets
+two1 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[1], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two2 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[2], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two3 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[3], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two4 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[4], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two5 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[5], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two6 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[6], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two7 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[7], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two8 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[8], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two9 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[9], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+two10 = data.frame(x = x, y = y, xs = xscale, ys = yscale, z = gauss(mu = mu, diag(2)*sigma_two[10], 20, xy, xc, psill, rnge_two, nugget, errvg = 0.1))
+
+wireframe(z ~ x + y, two1, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two2, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two3, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two4, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two5, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two6, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two7, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two8, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two9, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+wireframe(z ~ x + y, two10, scales = list(x = list(arrows = T), y = list(arrows = T), z = list(arrows = F)), drape = T)
+
+
+########## IV. Thin plate spline estimation ##########
+
+# Choose range for number of knots
+Ks = seq(2, 10)
+
+two1.stan2 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan2, file = "Output/Autocorrelation/two1stan2.rda")
+two1.stan3 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan3, file = "Output/Autocorrelation/two1stan3.rda")
+two1.stan4 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan4, file = "Output/Autocorrelation/two1stan4.rda")
+two1.stan5 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan5, file = "Output/Autocorrelation/two1stan5.rda")
+two1.stan6 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan6, file = "Output/Autocorrelation/two1stan6.rda")
+two1.stan7 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan7, file = "Output/Autocorrelation/two1stan7.rda")
+two1.stan8 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan8, file = "Output/Autocorrelation/two1stan8.rda")
+two1.stan9 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan9, file = "Output/Autocorrelation/two1stan9.rda")
+two1.stan10 = tps(x = two1$xs, y = two1$ys, z = two1$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two1.stan10, file = "Output/Autocorrelation/two1stan10.rda")
+
+two2.stan2 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan2, file = "Output/Autocorrelation/two2stan2.rda")
+two2.stan3 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan3, file = "Output/Autocorrelation/two2stan3.rda")
+two2.stan4 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan4, file = "Output/Autocorrelation/two2stan4.rda")
+two2.stan5 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan5, file = "Output/Autocorrelation/two2stan5.rda")
+two2.stan6 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan6, file = "Output/Autocorrelation/two2stan6.rda")
+two2.stan7 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan7, file = "Output/Autocorrelation/two2stan7.rda")
+two2.stan8 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan8, file = "Output/Autocorrelation/two2stan8.rda")
+two2.stan9 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan9, file = "Output/Autocorrelation/two2stan9.rda")
+two2.stan10 = tps(x = two2$xs, y = two2$ys, z = two2$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two2.stan10, file = "Output/Autocorrelation/two2stan10.rda")
+
+two3.stan2 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan2, file = "Output/Autocorrelation/two3stan2.rda")
+two3.stan3 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan3, file = "Output/Autocorrelation/two3stan3.rda")
+two3.stan4 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan4, file = "Output/Autocorrelation/two3stan4.rda")
+two3.stan5 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan5, file = "Output/Autocorrelation/two3stan5.rda")
+two3.stan6 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan6, file = "Output/Autocorrelation/two3stan6.rda")
+two3.stan7 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan7, file = "Output/Autocorrelation/two3stan7.rda")
+two3.stan8 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan8, file = "Output/Autocorrelation/two3stan8.rda")
+two3.stan9 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan9, file = "Output/Autocorrelation/two3stan9.rda")
+two3.stan10 = tps(x = two3$xs, y = two3$ys, z = two3$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two3.stan10, file = "Output/Autocorrelation/two3stan10.rda")
+
+two4.stan2 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan2, file = "Output/Autocorrelation/two4stan2.rda")
+two4.stan3 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan3, file = "Output/Autocorrelation/two4stan3.rda")
+two4.stan4 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan4, file = "Output/Autocorrelation/two4stan4.rda")
+two4.stan5 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan5, file = "Output/Autocorrelation/two4stan5.rda")
+two4.stan6 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan6, file = "Output/Autocorrelation/two4stan6.rda")
+two4.stan7 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan7, file = "Output/Autocorrelation/two4stan7.rda")
+two4.stan8 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan8, file = "Output/Autocorrelation/two4stan8.rda")
+two4.stan9 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan9, file = "Output/Autocorrelation/two4stan9.rda")
+two4.stan10 = tps(x = two4$xs, y = two4$ys, z = two4$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two4.stan10, file = "Output/Autocorrelation/two4stan10.rda")
+
+two5.stan2 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan2, file = "Output/Autocorrelation/two5stan2.rda")
+two5.stan3 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan3, file = "Output/Autocorrelation/two5stan3.rda")
+two5.stan4 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan4, file = "Output/Autocorrelation/two5stan4.rda")
+two5.stan5 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan5, file = "Output/Autocorrelation/two5stan5.rda")
+two5.stan6 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan6, file = "Output/Autocorrelation/two5stan6.rda")
+two5.stan7 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan7, file = "Output/Autocorrelation/two5stan7.rda")
+two5.stan8 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan8, file = "Output/Autocorrelation/two5stan8.rda")
+two5.stan9 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan9, file = "Output/Autocorrelation/two5stan9.rda")
+two5.stan10 = tps(x = two5$xs, y = two5$ys, z = two5$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two5.stan10, file = "Output/Autocorrelation/two5stan10.rda")
+
+two6.stan2 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan2, file = "Output/Autocorrelation/two6stan2.rda")
+two6.stan3 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan3, file = "Output/Autocorrelation/two6stan3.rda")
+two6.stan4 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan4, file = "Output/Autocorrelation/two6stan4.rda")
+two6.stan5 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan5, file = "Output/Autocorrelation/two6stan5.rda")
+two6.stan6 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan6, file = "Output/Autocorrelation/two6stan6.rda")
+two6.stan7 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan7, file = "Output/Autocorrelation/two6stan7.rda")
+two6.stan8 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan8, file = "Output/Autocorrelation/two6stan8.rda")
+two6.stan9 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan9, file = "Output/Autocorrelation/two6stan9.rda")
+two6.stan10 = tps(x = two6$xs, y = two6$ys, z = two6$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two6.stan10, file = "Output/Autocorrelation/two6stan10.rda")
+
+two7.stan2 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan2, file = "Output/Autocorrelation/two7stan2.rda")
+two7.stan3 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan3, file = "Output/Autocorrelation/two7stan3.rda")
+two7.stan4 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan4, file = "Output/Autocorrelation/two7stan4.rda")
+two7.stan5 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan5, file = "Output/Autocorrelation/two7stan5.rda")
+two7.stan6 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan6, file = "Output/Autocorrelation/two7stan6.rda")
+two7.stan7 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan7, file = "Output/Autocorrelation/two7stan7.rda")
+two7.stan8 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan8, file = "Output/Autocorrelation/two7stan8.rda")
+two7.stan9 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan9, file = "Output/Autocorrelation/two7stan9.rda")
+two7.stan10 = tps(x = two7$xs, y = two7$ys, z = two7$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two7.stan10, file = "Output/Autocorrelation/two7stan10.rda")
+
+two8.stan2 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan2, file = "Output/Autocorrelation/two8stan2.rda")
+two8.stan3 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan3, file = "Output/Autocorrelation/two8stan3.rda")
+two8.stan4 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan4, file = "Output/Autocorrelation/two8stan4.rda")
+two8.stan5 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan5, file = "Output/Autocorrelation/two8stan5.rda")
+two8.stan6 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan6, file = "Output/Autocorrelation/two8stan6.rda")
+two8.stan7 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan7, file = "Output/Autocorrelation/two8stan7.rda")
+two8.stan8 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan8, file = "Output/Autocorrelation/two8stan8.rda")
+two8.stan9 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan9, file = "Output/Autocorrelation/two8stan9.rda")
+two8.stan10 = tps(x = two8$xs, y = two8$ys, z = two8$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000)
+save(object = two8.stan10, file = "Output/Autocorrelation/two8stan10.rda")
+
+two9.stan2 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan2, file = "Output/Autocorrelation/two9stan2.rda")
+two9.stan3 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan3, file = "Output/Autocorrelation/two9stan3.rda")
+two9.stan4 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan4, file = "Output/Autocorrelation/two9stan4.rda")
+two9.stan5 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan5, file = "Output/Autocorrelation/two9stan5.rda")
+two9.stan6 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan6, file = "Output/Autocorrelation/two9stan6.rda")
+two9.stan7 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan7, file = "Output/Autocorrelation/two9stan7.rda")
+two9.stan8 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan8, file = "Output/Autocorrelation/two9stan8.rda")
+two9.stan9 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan9, file = "Output/Autocorrelation/two9stan9.rda")
+two9.stan10 = tps(x = two9$xs, y = two9$ys, z = two9$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two9.stan10, file = "Output/Autocorrelation/two9stan10.rda")
+
+two10.stan2 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[1], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan2, file = "Output/Autocorrelation/two10stan2.rda")
+two10.stan3 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[2], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan3, file = "Output/Autocorrelation/two10stan3.rda")
+two10.stan4 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[3], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan4, file = "Output/Autocorrelation/two10stan4.rda")
+two10.stan5 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[4], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan5, file = "Output/Autocorrelation/two10stan5.rda")
+two10.stan6 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[5], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan6, file = "Output/Autocorrelation/two10stan6.rda")
+two10.stan7 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[6], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan7, file = "Output/Autocorrelation/two10stan7.rda")
+two10.stan8 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[7], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan8, file = "Output/Autocorrelation/two10stan8.rda")
+two10.stan9 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[8], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan9, file = "Output/Autocorrelation/two10stan9.rda")
+two10.stan10 = tps(x = two10$xs, y = two10$ys, z = two10$z, K = Ks[9], offset = rep(0, nx*ny), nchains = 6, nburn = 1000, niter = 5000, inc = 1000, pv = F)
+save(object = two10.stan10, file = "Output/Autocorrelation/two10stan10.rda")
+
+# Save grouped objects
+two1.stan = list(two1.stan2, two1.stan3, two1.stan4, two1.stan5, two1.stan6, two1.stan7, two1.stan8, two1.stan9, two1.stan10)
+two2.stan = list(two2.stan2, two2.stan3, two2.stan4, two2.stan5, two2.stan6, two2.stan7, two2.stan8, two2.stan9, two2.stan10)
+two3.stan = list(two3.stan2, two3.stan3, two3.stan4, two3.stan5, two3.stan6, two3.stan7, two3.stan8, two3.stan9, two3.stan10)
+two4.stan = list(two4.stan2, two4.stan3, two4.stan4, two4.stan5, two4.stan6, two4.stan7, two4.stan8, two4.stan9, two4.stan10)
+two5.stan = list(two5.stan2, two5.stan3, two5.stan4, two5.stan5, two5.stan6, two5.stan7, two5.stan8, two5.stan9, two5.stan10)
+two6.stan = list(two6.stan2, two6.stan3, two6.stan4, two6.stan5, two6.stan6, two6.stan7, two6.stan8, two6.stan9, two6.stan10)
+two7.stan = list(two7.stan2, two7.stan3, two7.stan4, two7.stan5, two7.stan6, two7.stan7, two7.stan8, two7.stan9, two7.stan10)
+two8.stan = list(two8.stan2, two8.stan3, two8.stan4, two8.stan5, two8.stan6, two8.stan7, two8.stan8, two8.stan9, two8.stan10)
+two9.stan = list(two9.stan2, two9.stan3, two9.stan4, two9.stan5, two9.stan6, two9.stan7, two9.stan8, two9.stan9, two9.stan10)
+two10.stan = list(two10.stan2, two10.stan3, two10.stan4, two10.stan5, two10.stan6, two10.stan7, two10.stan8, two10.stan9, two10.stan10)
+
+save(object = two1.stan, file = "Output/Grouped/two1stan.rda")
+save(object = two2.stan, file = "Output/Grouped/two2stan.rda")
+save(object = two3.stan, file = "Output/Grouped/two3stan.rda")
+save(object = two4.stan, file = "Output/Grouped/two4stan.rda")
+save(object = two5.stan, file = "Output/Grouped/two5stan.rda")
+save(object = two6.stan, file = "Output/Grouped/two6stan.rda")
+save(object = two7.stan, file = "Output/Grouped/two7stan.rda")
+save(object = two8.stan, file = "Output/Grouped/two8stan.rda")
+save(object = two9.stan, file = "Output/Grouped/two9stan.rda")
+save(object = two10.stan, file = "Output/Grouped/two10stan.rda")
