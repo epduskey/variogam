@@ -1,7 +1,7 @@
 # Code to run standard GAM+OK method
 
 # Created: May 19, 2021
-# Last modified: May 21, 2021
+# Last modified: May 21, 2021 by EPD
 
 # Set working directory
 setwd(paste(mypath, "variogam-main", sep = ""))
