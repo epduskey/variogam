@@ -17,7 +17,6 @@ Please follow all instructions therein to ensure that CmdStanR has been properly
 Follow these steps prior to first time usage to ensure the code runs properly on your machine:
 
 1. Download the "variogam-main" zipped folder from Github in its entirety
-2. Unzip and pull "variogam" from "variogam-main"
 2. Place in your preferred directory
 3. Navigate to the Code folder and open the file "depend.R" in R or RStudio
 4. Confirm that all listed packages are installed on your machine; uncomment and run lines corresponding to packages you have not yet installed, then re-comment
