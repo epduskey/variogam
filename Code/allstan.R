@@ -4,7 +4,7 @@
 # Last modified: May 21, 2021 by EPD
 
 # Set working directory
-setwd(paste(mypath, "variogam", sep = ""))
+setwd(paste(mypath, "variogam-main", sep = ""))
 
 # File layout:		
 #	I. Simulate ten one-dimensional data sets
