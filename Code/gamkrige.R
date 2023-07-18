@@ -1,15 +1,16 @@
 # Code to run standard GAM+OK method
 
-# Created: May 19, 2021
-# Last modified: May 21, 2021 by EPD
+# Created: November 4, 2020
+# Last modified: May 19, 2021
 
 # Set working directory
-setwd(paste(mypath, "variogam-main", sep = ""))
+setwd("/Users/epdus/OneDrive/School/Research/Splines")
 
 # Load packages
 library(mgcv)
 library(gstat)
 library(sp)
+library(fields)
 
 # Source the necessary scripts
 source("Code/alldata.R")
@@ -42,7 +43,7 @@ gamok.one = function(dat) {
 	coordinates(dat) = c("xs","ys")
 	dat.vario = variogram(resid ~ 1, dat)
 	plot(gamma ~ dist, dat.vario, main = "vario")
-	dat.fit = fit.variogram.gls(resid ~ 1, dat, vgm(nugget = 0, psill = 1, range = 0.001, model = "Exp"), maxiter = 0)
+	dat.fit = fit.variogram.gls(resid ~ 1, dat, vgm(nugget = 0, psill = 1, range = 0.001, model = "Exp"), maxiter = 30)
 	lines(variogramLine(dat.fit, maxdist = 2), lwd = 2)
 	
 	# Return GAM and OK object
@@ -58,7 +59,7 @@ gamok.two = function(dat) {
 	par(mfrow = c(1,2))
 	
 	# Run and plot GAM
-	gam.dat = gam(z ~ ti(xs) + ti(ys) + ti(xs,ys), data = dat, family = poisson())
+	gam.dat = gam(z ~ s(xs,ys), data = dat, family = poisson())
 	dat.pred = data.frame(xs = rep(seq(min(dat$xs),max(dat$xs),length.out = 100),100), ys = rep(seq(min(dat$ys),max(dat$ys),length.out = 100),each=100))
 	dat.pred$z = exp(predict(gam.dat, newdata = dat.pred))
 	dat.sp = xyz2img(dat.pred, xcol = 1, ycol = 2, zcol = 3)

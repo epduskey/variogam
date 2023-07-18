@@ -1,10 +1,10 @@
 # Code to recreate all simulated data sets in Duskey et al 2021
 
-# Created: May 19, 2021
-# Last modified: May 21, 2021 by EPD
+# Created: December 17, 2020
+# Last modified: May 19, 2021 by EPD
 
 # Set working directory
-setwd(paste(mypath, "variogam-main", sep = ""))
+setwd("/Users/epdus/OneDrive/School/Research/Splines")
 
 # Source the necessary scripts
 

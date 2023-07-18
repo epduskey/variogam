@@ -1,3 +1,4 @@
+# install.packages("mvtnorm")
 library(mvtnorm)
 
 # A function to get estimated medians from Stan objects
@@ -17,6 +18,24 @@ getmed = function(obj, type) {
 	
 	if(type == "2d") {return(apply(out, 2, median))}
 	else if(type == "3d") {return(matrix(apply(out, 2, median), nrow = 10, ncol = 10, byrow = T))}
+}
+
+# A function to get estimated medians from scallop Stan objects
+#	obj: Stan model objects with output and design matrix
+#	dat: data upon which model obj was run
+#	returns vector of median density estimates
+getmedex = function(obj, dat) {
+	
+	# Reconfigure draws object
+	b = apply(obj$ostan$draws("b"), 3, cbind)
+	
+	# Generate posterior predictions
+	out = matrix(NA, nrow = nrow(b), ncol = nrow(dat))
+	for(i in 1:nrow(out)) {
+		out[i,] = exp(obj$G %*% b[i,])
+	}
+	
+	return(apply(out, 2, median))
 }
 
 # Function to get covariance matrix from variogram parameters
@@ -155,13 +174,15 @@ rangebox = function(modlist) {
 #	modgam: the corresponding frequentist regression kriging model
 #	type: "2d" or "3d"
 #	returns a list of median density estimates for each model in modlist
-medplot2 = function(dat, ymax, yint, modlist, modgam, type) {
+medplot2 = function(dat, sigma, ymax, yint, modlist, modgam, type) {
 	plot(y~xs, dat, pch = 16, ylim = c(0-ymax*0.1,ymax+ymax*0.1), cex = 1, axes = F, ylab = "")
 	med = lapply(modlist, getmed, type = type)
+	zmu = mag_one*exp(-(dat$xs - mean(dat$xs))^2/(2*sigma^2))
 	for(i in 1:length(med)) {
 		lines(dat$xs, med[[i]], lwd = 2, col = lcol_knots[i])
 	}
 	lines(seq(-1.7,1.7,by=0.01), predict(modgam, newdata = list(xs = seq(-1.7,1.7,by=0.01)), type = "response"), lwd = 2, lty = 2, col = "red")
+	lines(dat$xs, zmu, lwd = 3, lty = 3, col = "blue")
 	axis(2, at = seq(0,ymax,by=yint), cex.axis = 2)
 	box()
 	return(med)
@@ -429,5 +450,176 @@ simcd = function(modlist, dat, K, stan, zmax) {
 			image(dat.pc, breaks = seq(0,zmax,length.out=1001), col = hcl.colors(1000,"Grays",rev=T), axes = F)
 			box(lty=2)
 		}
+	}
+}
+
+# Function to get generating mean for three-dimensional models
+#	dat: simulated three-dimensional data
+#	sigma: variance used to simulate dat
+#	im: plots image, if true
+#	zmax: maximum z value for plots
+#	returns generating mean if im is false; plots
+getzmu = function(dat, sigma, zmax, im = T) {
+	xy = matrix(c(dat$xs,dat$ys), nrow = length(dat$xs), ncol = 2)
+	mu = matrix(c(mean(dat$xs),mean(dat$ys)), nrow = 2, ncol = 1)
+	zmu = rep(NA, nrow(xy))
+	for(i in 1:length(zmu)) {
+		xi = t(t(xy[i,]))
+		zmu[i] = mag_two*exp((-1/2)*(t(xi-mu)%*%solve(diag(2)*sigma)%*%(xi-mu)))
+	}
+	if(im) {
+		pc = dat
+		pc$zmu = zmu
+		dat.pc = xyz2img(pc, zcol = 6, xcol = 3, ycol = 4, tolerance = 1e-9)
+		image(dat.pc, breaks = seq(0,zmax,length.out=1001), col = hcl.colors(1000,"Grays",rev=T), axes = F)
+		box(lty=2)
+	} else {
+		return(zmu)
+	}
+}
+
+# Function to build posterior of predicted values from posterior distribution for herring and stickleback:
+#	G: design matrix calculated by gcalc
+#	mod: model object from which we are predicting
+#	Gmod: design matrix arising from original model
+#	grid: grid data over which we are predicting
+#	dat: data used to run the original model
+#	pdat: data over which we are predicting
+#	returns a list with predicted median and kriged residuals
+pred_ac = function(G, mod, Gmod, dat, pdat) {
+  
+  # Get distance matrix
+  Mx = matrix(dat$xs, nrow = length(dat$xs), ncol = length(dat$xs))
+  My = matrix(dat$ys, nrow = length(dat$ys), ncol = length(dat$ys))
+  D = sqrt((Mx-t(Mx))^2 + (My-t(My))^2)
+  deps = apply(matrix(c(pdat$xs, pdat$ys), ncol = 2), 1, dv, x = dat$xs, y = dat$ys)	
+  
+  # Calculate mean response and residuals
+  mumat = apply(apply(mod$draws("b"), 3, cbind), 1, mmult, G = G, offset = 1)
+  # resid = sweep(-apply(apply(mod$draws("b"), 3, cbind), 1, mmult, G = Gmod, offset = 1), 1, dat$y, FUN = "+")
+  
+  # Krige residuals
+  # krmat = apply(rbind(c(mod$draws("sill")), c(mod$draws("range")), resid), 2, krg, D = D, deps = deps, ns = nrow(dat), np = nrow(pdat))
+  
+  #return(list(mu = mumat, kr = krmat))
+  return(mumat)
+}
+
+# Function to plot acoustic medians
+#	pdat: data over which we are predicting
+# preds: predictions of density
+# zcol: column number of predictions
+# max: maximum plotting range for density
+# pal: color palette
+# returns nothing, plots heat map of acoustic density predictions
+accd = function(pdat, preds, zcol, min, max, pal = "inferno") {
+  tempdat = pdat
+  tempdat$preds = apply(preds, 1, median)
+  temp.pc = xyz2img(tempdat, zcol = zcol, xcol = 16, ycol = 17, tolerance = 1e-9)
+  image(temp.pc, breaks = seq(min,max,length.out=1001), col = hcl.colors(1000,"inferno",rev=T), axes = F)
+}
+
+# Function to calculate design matrix from data grid for scallops:
+#	dat: data source that we used to run the model
+#	pdat: data over which we are predicting
+#	pedit: data over which we are predicting, with edited spatial coordinates
+#	Kd: number of knots for depth
+#	Kc: number of knots for 2d process
+#	returns design matrix
+gcalc_sc = function(dat, pdat, pedit, K, type) {
+	
+	if(type == "depth") {
+		
+		# Get knot values for depth
+		dknots = seq(min(dat$dscale) + 0.01*diff(range(dat$dscale)), max(dat$dscale) - 0.01*diff(range(dat$dscale)), length.out = K)
+	
+		# Set up the matrix dZ_K where dZ_K[i,j] = ((pdat$dscale[i]-dknots[j])_+)^3
+		dZK = matrix(NA, nrow = length(pdat$dscale), ncol = length(dknots))
+		for(i in 1:nrow(dZK)) {
+			for(j in 1:ncol(dZK)) {
+				dZK[i,j] = ifelse(pdat$dscale[i] - dknots[j] < 0, 0, (pdat$dscale[i]-dknots[j])^3) 
+			}
+		}
+	
+		# Calculate penalty matrix
+		omegad = pcube(dknots, maxdat = max(pdat$dscale))
+		svd.omegad = svd(omegad)
+		sqrt.omegad = t(svd.omegad$v %*% (t(svd.omegad$u)*sqrt(svd.omegad$d)))
+		dZ = t(solve(sqrt.omegad, t(dZK)))
+		dX = matrix(c(rep(1, length(pdat$dscale)), pdat$dscale), nrow = length(pdat$dscale), ncol = 2)
+		dG = cbind(dX,dZ)
+		
+		return(dG)
+	}
+	
+	if(type == "coords") {
+		
+		# Set up the knots (big K) for the coordinates, knots will concentrate in spatial data clusters
+		Kc.df = data.frame(x = dat$xscale, y = dat$yscale)
+		Kc.clust = hclust(dist(Kc.df))
+		Kc.tree = cutree(Kc.clust, k = K)
+		cknots = matrix(NA, nrow = K, ncol = 2)
+		for(i in 1:K) {
+			cknots[i, ] = apply(Kc.df[Kc.tree == i, ], 2, mean)
+		} 
+
+		# Set the matrix cZ_K where cZ_K[i,j] = r^2*log(r); r = sqrt((kx[i]-pdat$xscale[j])^2 + (ky[i]-pdat$yscale[j])^2)
+		cZK = matrix(NA,  nrow = length(pedit$xscale), ncol = nrow(cknots))
+		for(i in 1:nrow(cZK)) {
+			for(j in 1:ncol(cZK)) {
+				r = sqrt((pedit$xscale[i]-cknots[j,1])^2 + (pedit$yscale[i]-cknots[j,2])^2)
+				cZK[i,j] = (r^2)*log(r)
+			}
+		}
+
+		# Calculate the penalty matrix
+		omegac = pplate(cknots)
+		svd.omegac = svd(omegac)
+		sqrt.omegac = t(svd.omegac$v %*% (t(svd.omegac$u)*sqrt(svd.omegac$d)))
+		cZ = t(solve(sqrt.omegac, t(cZK)))
+		cX = matrix(c(pedit$xscale, pedit$yscale), nrow = length(pedit$xscale), ncol = 2)
+		cG = cbind(cX,cZ)
+	
+		return(cG)
+	}
+}
+
+# Plots predicted depth relationship of scallop example models
+#	pdat: prediction grid data
+#	parent: regional data set, mab or gb
+#	dat: data upon which models were run
+#	modlist: list of model objects
+#	ymax: maximum y value for plots
+#	yint: interval for y axis
+#	returns nothing, plots depth lines
+scdp = function(pdat, parent, dat, modlist, ymax, yint) {
+	plot(Count~dscale, dat, type = 'n', pch = 16, xlim = c(-1.6,4.12), ylim = c(0-ymax*0.1,ymax+ymax*0.1), cex = 1, axes = F, ylab = "")
+	for(i in 1:length(modlist)) {
+		pd = data.frame(dscale = seq(min(pdat$dscale), max(pdat$dscale), length.out = 500))
+		pd$depth = (pd$dscale * sd(parent$Depth)) + mean(parent$Depth)
+		G.pd = gcalc_sc(dat, pd, pdat, K = i+4, type = "depth")
+		pd.depth = apply(matrix(modlist[[i]]$ostan$draws("b")[,,1:(2+i+4)],nrow=6000,ncol=(2+i+4)), 1, mmult, G = G.pd, offset = 1)
+		pd$med = apply(pd.depth, 1, median)
+		lines(pd$dscale, pd$med, lwd = 2, col = lcol_peak[[i]])
+	}
+	axis(2, at = seq(0,ymax,by=yint), cex.axis = 2)
+	box()
+}
+
+# Plots heat maps of spatial coordinate relationship of scallop example models
+#	modlist: list of model objects
+#	dat: data upon which models were run
+#	pdat: prediction grid data
+#	Kd: number of knots for depth model
+#	Kc: number of knots for spatial coordinates model
+#	returns nothing, plots heat maps
+sccd = function(modlist, dat, pdat, Kd, Kc) {
+	for(i in 1:length(modlist)) {
+		pc = pdat
+		G.pc = gcalc_sc(dat, pc, pdat, K = Kc[i], type = "coords")
+		pc.coords = apply(matrix(modlist[[i]]$ostan$draws("b")[,,(2+Kd[i]+1):dim(modlist[[i]]$ostan$draws("b"))[3]],nrow=6000,ncol=(dim(modlist[[i]]$ostan$draws("b"))[3]-(2+Kd[i]))), 1, mmult, G = G.pc, offset = 1)
+		pc$med = apply(pc.coords, 1, median)
+		dmv.pc = xyz2img(pc, zcol = 9, xcol = 4, ycol = 5, tolerance = 1e-9)
+		image(dmv.pc, breaks = seq(0,8,length.out=1001), col = hcl.colors(1000,"Grays",rev=T), axes = F)
 	}
 }

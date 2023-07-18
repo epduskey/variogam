@@ -13,6 +13,16 @@
 #install.packages("rasterVis")
 #install.packages("HDInterval")
 #install.packages("fields")
+#install.packages("rgl")
+#install.packages("rgdal")
+#install.packages("ggplot2")
+#install.packages("ggpubr")
+#install.packages("rnaturalearth")
+#install.packages("rnaturalearthdata")
+#install.packages("sf")
+#install.packages("grid")
+#install.packages("cowplot")
+#install.packages("geometry")
 
 # Set path to variogam
 mypath = "/Users/Elizabeth/OneDrive/School/Research/Splines/"

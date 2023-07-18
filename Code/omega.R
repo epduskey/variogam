@@ -1,3 +1,4 @@
+# install.packages("Ryacas0")
 library(Ryacas0)
 x = Sym("x")
 f1 = function(x) {return( x^2 )}

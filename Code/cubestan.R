@@ -1,3 +1,4 @@
+# install.packages("cmdstanr")
 library(cmdstanr)
 
 # Cubic spline Bayesian estimation
@@ -5,14 +6,14 @@ library(cmdstanr)
 # 	y: observation e.g. organism density
 # 	K: number of knots
 # 	offset: area offset for density measurements
+#	rorsd: spline coefficient variance hyperparameter rate OR spline coefficient SD
 # 	nchains: number of chains in model run
 # 	nburn: number of warmup iterations
 # 	niter: number of post-warmup iterations in each chain
-# 	nthin: thinning interval (i.e. keep every nthin^th iteration)
 # 	par: number of chains to run in parallel at a given time
 # 	pv: estimate btau if T, set btau to 0.1 if F; default is T
 #	returns stan output and design matrix
-cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv = T) {
+cubic = function(x, y, K, offset, rorsd, nchains, nburn, niter, inc, par = 3, pv = T) {
 	
 	# Calculate distance between points
 	Mx = matrix(x, nrow = length(x), ncol = length(x), byrow = T)
@@ -45,17 +46,20 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 		{
 			// Count observations and area offset
 			int<lower=1> n;	
-			int<lower=0> y[n];
-			vector<lower=0>[n] offset;
+			array[n] int<lower=0> y;
+			vector<lower=0>[n] ofs;
 			
 			// Knots
 			int<lower=1> k;
 			
 			// Design matrix
-			vector[k+2] G[n];
+			array[n] vector[k+2] G;
 			
 			// Distance matrix
 			matrix<lower=0>[n,n] D;
+			
+			// Spline coefficient variance rate
+			real<lower=0> rorsd;
 		}
 		parameters
 		{
@@ -77,7 +81,7 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 			vector[n] log_mu;
 			vector[n] residual;
 			for(i in 1:n) {
-				log_mu[i] = dot_product(b,G[i]) + offset[i];
+				log_mu[i] = dot_product(b,G[i]) + ofs[i];
 				residual[i] = y[i] - exp(log_mu[i]);
 			}
 		}
@@ -88,7 +92,7 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 			// Spline model coefficient and variance priors
 			b[1:2] ~ normal(0,1);
 			b[3:k+2] ~ normal(0,btau);
-			btau ~ gamma(1,0.5);
+			btau ~ gamma(1,rorsd);
 		
 			// Variogram priors
 			nugget ~ normal(0,1) T[0,];
@@ -115,7 +119,7 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 			// Count observations and area offset
 			int<lower=1> n;	
 			int<lower=0> y[n];
-			vector<lower=0>[n] offset;
+			vector<lower=0>[n] ofs;
 			
 			// Knots
 			int<lower=1> k;
@@ -145,7 +149,7 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 			vector[n] log_mu;
 			vector[n] residual;
 			for(i in 1:n) {
-				log_mu[i] = dot_product(b,G[i]) + offset[i];
+				log_mu[i] = dot_product(b,G[i]) + ofs[i];
 				residual[i] = y[i] - exp(log_mu[i]);
 			}
 		}
@@ -183,7 +187,8 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 				k = K,		# Number of knots
 				G = G,		# Restructured design matrix
 				D = D,		# Matrix of distances between points
-				offset = offset
+				ofs = offset,		# Area offset
+				rorsd = rorsd		# Spline coefficient variance rate OR spline coefficient SD
 				)
 	
 	# Stan model run
@@ -205,4 +210,25 @@ cubic = function(x, y, K, offset, nchains, nburn, niter, nthin, inc, par = 3, pv
 	
 	# Return model object
 	return(list(ostan = ostan, G = G))
+}
+
+# Function to apply "cubic" to a list containing one or more rates
+#	All arguments are identical to cubic, save that rate may be a list containing one or more values for 'rorsd'
+#	returns a list of lists, each of which contains model results as applied with each value of 'rorsd'
+cubeapply = function(x, y, K, offset, rorsd, nchains, nburn, niter, inc, par = 3, pv = T) {
+	
+	# Apply "cubic" function to each value of rorsd
+	out = lapply(rorsd, 
+	cubic, 
+	x = x, 
+	y = y, 
+	K = K, 
+	offset = offset, 
+	nchains = nchains, 
+	nburn = nburn, 
+	niter = niter,
+	inc = inc)
+	
+	# Return list of lists
+	return(out)
 }

@@ -1,3 +1,4 @@
+# install.packages("gstat")
 library(gstat)
 
 # Simulate Gaussian data

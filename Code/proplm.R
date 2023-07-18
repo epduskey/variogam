@@ -1,10 +1,10 @@
 # Fit simple linear models to the maximum median estimates and variogram parameters
 
-# Created: May 19, 2021
-# Last modified: May 21, 2021 by EPD
+# Created: May 7, 2021
+# Last modified: May 19, 2021
 
 # Set working directory
-setwd(paste(mypath, "variogam-main", sep = ""))
+setwd("/Users/Elizabeth/OneDrive/School/Research/Splines")
 
 # Load packages
 library(mgcv)

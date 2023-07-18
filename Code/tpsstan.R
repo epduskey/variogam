@@ -1,3 +1,4 @@
+# install.packages("cmdstanr")
 library(cmdstanr)
 
 # Thin plate spline Bayesian estimation
@@ -6,13 +7,13 @@ library(cmdstanr)
 # 	z: z-coordinate (i.e. surface height e.g. density)
 # 	K: number of knots
 # 	cutoff: variogram cutoff - no covariation beyond cutoff
+#	rorsd: spline coefficient variance hyperparameter rate OR spline coefficient SD
 # 	nchains: number of chains in Bayesian model run
 # 	nburn: number of iterations to discard from each chain
 # 	niter: number of iterations in each chain
-# 	nthin: thinning interval (i.e. keep every nthin^th iteration)
 # 	par: default true to run chains in parallel
 #	returns stan output and design matrix
-tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par = 3, pv = T) {
+tps = function(x, y, z, K, offset, rorsd, nchains, nburn, niter, inc, plot.k = F, par = 3, pv = T) {
 	
 	# Calculate distances between points
 	Mx = matrix(x, nrow = length(x), ncol = length(x))
@@ -64,6 +65,9 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 			
 			// Distance matrix
 			matrix<lower=0>[n,n] D;
+			
+			// Spline coefficient variance rate
+			real<lower=0> rorsd;
 		}
 		parameters
 		{
@@ -96,7 +100,7 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 			// Spline model coefficient and variance priors
 			b[1:3] ~ normal(0,1);
 			b[4:k+3] ~ normal(0,btau);
-			btau ~ gamma(1,0.5);
+			btau ~ gamma(1,rorsd);
 			
 			// Variogram priors
 			nugget ~ normal(0,1) T[0,];
@@ -133,6 +137,9 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 			
 			// Distance matrix
 			matrix<lower=0>[n,n] D;
+			
+			// Spline coefficient SD
+			real<lower=0> rorsd;
 		}
 		parameters
 		{
@@ -163,7 +170,7 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 			
 			// Spline model coefficient and variance priors
 			b[1:3] ~ normal(0,1);
-			b[4:k+3] ~ normal(0,0.1);
+			b[4:k+3] ~ normal(0,rorsd);
 			
 			// Variogram priors
 			nugget ~ normal(0,1) T[0,];
@@ -191,7 +198,8 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 				k = K,		# Number of knots
 				G = G,		# Restructured design matrix
 				D = D,		# Matrix of distances between points
-				offset = offset
+				offset = offset, 	# Area offset
+				rorsd = rorsd		# Spline coefficient variance rate OR spline coefficient SD
 				)
 	
 	# Stan model run
@@ -200,7 +208,7 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 		chains = nchains,
 		parallel_chains = par,
 		refresh = inc,
-		adapt_delta = 0.8,
+		adapt_delta = 0.99,
 		max_treedepth = 15,
 		iter_warmup = nburn,
 		iter_sampling = niter,
@@ -214,4 +222,26 @@ tps = function(x, y, z, K, offset, nchains, nburn, niter, inc, plot.k = F, par =
 	# Return model object
 	return(list(ostan = ostan, G = G))
 	
+}
+
+# Function to apply "tps" to a vector containing one or more rates
+#	All arguments are identical to tps, save that rate may be a vector containing one or more values for 'rorsd'
+#	returns a list of lists, each of which contains model results as applied with each value of 'rorsd'
+tpsapply = function(x, y, z, K, offset, rorsd, nchains, nburn, niter, inc, plot.k = F, par = 3, pv = T) {
+	
+	# Apply "cubic" function to each value of rorsd
+	out = sapply(rorsd, 
+	tps, 
+	x = x, 
+	y = y, 
+	z = z,
+	K = K, 
+	offset = offset, 
+	nchains = nchains, 
+	nburn = nburn, 
+	niter = niter, 
+	inc = inc)
+	
+	# Return list of lists
+	return(out)
 }
