@@ -1,6 +1,6 @@
 # Welcome to variogam
 
-The variogam folder contains all code necessary to recreate the simulation study found in Duskey and Sullivan 2023.  We will update with the full citation when the article has been accepted for publication.  Briefly, the code can simulate data with a mean trend and autocorrelated residuals, and then run a Bayesian regression kriging model in Stan through CmdStanR.  The regression is a penalized spline, commonly associated with GAMs, and the variogram is a simple exponential model.
+The variogam folder contains all code necessary to recreate the simulation study found in Duskey et al., 2023.  We will update with the full citation when the article has been accepted for publication.  Briefly, the code can simulate data with a mean trend and autocorrelated residuals, and then run a Bayesian regression kriging model in Stan through CmdStanR.  The regression is a penalized spline, commonly associated with GAMs, and the variogram is a simple exponential model.
 
 ## Requirements
 
