@@ -1,0 +1,11 @@
+Instrument,Header,InstrumentFrequency,InstrumentTransducerLocation,InstrumentTransducerManufacturer,InstrumentTransducerModel,InstrumentTransducerSerial,InstrumentTransducerBeamType,InstrumentTransducerDepth,InstrumentTransducerOrientation,InstrumentTransducerPSI,InstrumentTransducerBeamAngleMajor,InstrumentTransducerBeamAngleMinor,InstrumentTransceiverManufacturer,InstrumentTransceiverModel,InstrumentTransceiverSerial,InstrumentTransceiverFirmware,InstrumentComments,InstrumentID,
+Instrument,Record,38,AB,Simrad,ES38-7,,S2,,elevation 0¡ azimuth 0¡ rotation 0¡,,,,Simrad,WBT,,,,I1,
+Calibration,Header,CalibrationDate,CalibrationAcquisitionMethod,CalibrationProcessingMethod,CalibrationAccuracyEstimate,CalibrationReport,CalibrationComments,CalibrationID,,,,,,,,,,,
+Calibration,Record,10/3/20,SS,EK80,0.06,,,C1,,,,,,,,,,,
+DataAcquisition,Header,DataAcquisitionSoftwareName,DataAcquisitionSoftwareVersion,DataAcquisitionStoredDataFormat,DataAcquisitionPingDutyCycle,DataAcquisitionComments,DataAcquisitionID,,,,,,,,,,,,
+DataAcquisition,Record,EK80,,RAW,continuous pinging at 1 per second,,DA1,,,,,,,,,,,,
+DataProcessing,Header,DataProcessingSoftwareName,DataProcessingSoftwareVersion,DataProcessingTriwaveCorrection,DataProcessingChannelID,DataProcessingBandwidth,DataProcessingFrequency,DataProcessingTransceiverPower,DataProcessingTransmitPulseLength,DataProcessingOnAxisGain,DataProcessingOnAxisGainUnit,DataProcessingSaCorrection,DataProcessingAbsorption,DataProcessingAbsorptionDescription,DataProcessingSoundSpeed,DataProcessingSoundSpeedDescription,DataProcessingTransducerPSI,DataProcessingComments,DataProcessingID
+DataProcessing,Record,LSSS,2.12.0,NA,2,,38,2000,1.024,22,dB,,,estimated by EK80,,,3,,DP1
+EchoType,Header,EchoTypeStratum,EchoTypeComments,EchoTypeSpeciesCode,EchoTypeSpeciesCategory,EchoTypeID,,,,,,,,,,,,,
+Cruise,Header,CruiseSurvey,CruiseCountry,CruisePlatform,CruiseStartDate,CruiseEndDate,CruiseOrganisation,CruiseLocalID,,,,,,,,,,,
+Cruise,Record,BIAS,SE,77SE,10/2/22,10/17/22,189,BIAS_2022_SWE,,,,,,,,,,,
