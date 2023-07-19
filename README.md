@@ -2,6 +2,10 @@
 
 The variogam folder contains all code necessary to recreate the simulation study found in Duskey et al., 2023.  We will update with the full citation when the article has been accepted for publication.  Briefly, the code can simulate data with a mean trend and autocorrelated residuals, and then run a Bayesian regression kriging model in Stan through CmdStanR.  The regression is a penalized spline, commonly associated with GAMs, and the variogram is a simple exponential model.
 
+## Abstract
+
+Regression kriging with penalized splines allow us to describe nonlinear relationships between species abundance and environmental variation at multiple spatial scales.  This method has been used to characterize both broad-scale trend and fine-scale spatial autocorrelation in abundance of marine fisheries species.  In general use, it is applied step-wise.  However, this lack of iterative fitting and formal characterization of uncertainty can disguise the relationship between broad- and fine-scale patterns.  To address this, we developed a regression kriging model with penalized splines in a Bayesian framework.   Both a simulation study, and applications to acoustic and belt transect surveys of marine fisheries species, were used to test the flexibility and performance of our model.  We found that the balance between the regression and kriging models is highly dependent upon the number of knots.  This may thus serve as a critical source of prior information.  Results of applications to real data also suggest that model behavior is dependent upon species.  The flexibility inherent in this model may be a desirable property for species which exhibit both broad- and fine-scale spatial patterns.  With cautious application of prior knowledge, Bayesian regression kriging with penalized splines can be a powerful tool for the marine sciences.
+
 ## Requirements
 
 The Bayesian models contained in variogam run in Stan via the R package CmdStanR.  See the following website for instructions on how to install CmdStan, CmdStanR, and Stan:
