@@ -208,14 +208,14 @@ acoustic_map = ggplot(data = world) +
 scallop_map = ggplot(data = world) +
   geom_sf(fill = "gray", color = "darkgray") +
   geom_sf(data = scallop_sf, size = 1, shape = 22, fill = "pink") +
-  geom_sf(data = scallop_leg, size = 1, shape = 24, fill = "pink") +
+  geom_sf(data = scallop_leg, size = 1, shape = 22, fill = "pink") +
   coord_sf(xlim = c(-80,-68), ylim = c(35,42), expand = FALSE) + 
   annotate("text", x = -78.6, y = 41, label= "Scallops", size = 4, hjust = 0) + 
   theme_void() + 
   theme(panel.background = element_rect(fill = "azure"), panel.border = element_rect(linewidth = 2, fill = NA))
 
 # Draw the final map
-png("Plots/figure_1.png", width = 5000, height = 2500, units = 'px', res = 600)
+jpeg("Plots/figure_1.jpg", width = 5000, height = 2500, units = 'px', res = 600)
 ggdraw(world_map) +
   draw_plot(acoustic_map, width = 0.82, height = 0.52, x = 0.30, y = 0.24) +
   draw_plot(scallop_map, width = 0.39, height = 0.33, x = -0.01, y = 0.31)
@@ -224,7 +224,7 @@ dev.off()
 
 ########## II. Figure 2 ##########
 
-png("Plots/figure_2.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_2.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -258,7 +258,7 @@ mm9 = medmax(one9.med)
 mm10 = medmax(one10.med)
 mm = list(mm1, mm2, mm3, mm4, mm5, mm6, mm7, mm8, mm9, mm10)
 
-png("Plots/figure_3.png", width = 9000, height = 3000, units = 'px', res = 600)
+jpeg("Plots/figure_3.jpg", width = 9000, height = 3000, units = 'px', res = 600)
 par(mfrow = c(1,3))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(1, ylim = c(0,1), xlim = c(2,10), type = 'n', xlab = "", ylab = "Sill (normalized)", cex.lab = 2, axes = F)
@@ -336,7 +336,7 @@ zm9 = medmax(z9)
 zm10 = medmax(z10)
 zm = list(zm1, zm2, zm3, zm4, zm5, zm6, zm7, zm8, zm9, zm10)
 
-png("Plots/figure_4.png", width = 9000, height = 3000, units = 'px', res = 600)
+jpeg("Plots/figure_4.jpg", width = 9000, height = 3000, units = 'px', res = 600)
 par(mfrow = c(1,3))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(1, ylim = c(0,1), xlim = c(2,10), type = 'n', xlab = "", ylab = "Sill (normalized)", cex.lab = 2, axes = F)
@@ -390,7 +390,7 @@ dev.off()
 ########## V. Figure 5 ##########
 
 # Plot all herring and stickleback results
-png("Plots/figure_5.png", width = 7500, height = 2500, units = 'px', res = 600)
+jpeg("Plots/figure_5.jpg", width = 7500, height = 2500, units = 'px', res = 600)
 par(mfrow = c(1,4))
 par(mar = c(5,3,3,1), oma = c(2,4,0.5,0.5))
 plot(1, ylim = c(0,1), xlim = c(2,10), type = 'n', xlab = "", ylab = "", main = "Sill", cex.lab = 2, cex.main = 2, axes = F)
@@ -527,7 +527,7 @@ colnames(scallop.ic)[3] = "Value"
 allop = rbind(scallop.sill, scallop.range, scallop.max, scallop.ic)
 opt = data.frame(x = c(8), y = c(5))
 coordinates(opt) = c("x","y")
-png("Plots/figure_8.png", width = 20, height = 20, units = 'cm', res = 300)
+jpeg("Plots/figure_6.jpg", width = 20, height = 20, units = 'cm', res = 300)
 rasterVis::levelplot(Norm ~ Kd * Kc | Group, allop, col.regions = gray.colors(100,rev=T), at = seq(0,1,by=0.01), pretty = T, xlab = list(label = expression("K"["cube"]), cex = 1.5), ylab = list(label = expression("K"["tps"]), cex = 1.5), 
                      colorkey = list(labels = list(cex = 1.2)), main = "", cex.lab = 5, cex.axis = 1.2, par.strip.text=list(cex = 1.2), par.settings = list(strip.background = list(col = "white")), scales = list(x = list(at = seq(5,14), cex = 1.2), 
                                                                                                                                                                                                                    y = list(at = seq(5,14), cex = 1.2)), strip = strip.custom(factor.levels = c("LOOIC", "Maximum density", "Range", "Sill"))) + latticeExtra::layer(sp.points(opt, pch = 9, cex = 1.2, lwd = 2, col = lcol_knots[1:3]))
@@ -547,7 +547,7 @@ all = one12.pred$mu + one12.pred$kr
 one12.sm = apply(one12.pred$mu + one12.pred$kr, 1, mean)
 one12.sv = apply(one12.pred$mu + one12.pred$kr, 1, var)
 
-png("Plots/figure_7.png", width = 45, height = 15, units = 'cm', res = 300)
+jpeg("Plots/figure_7.jpg", width = 45, height = 15, units = 'cm', res = 300)
 par(mfrow = c(1,3))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(pdat.12$xs, one12.mean, type = 'l', lwd = 2, xlab = "", ylab = "", cex.axis = 2, ylim = c(0,60))
@@ -567,7 +567,7 @@ dev.off()
 
 ########## VIII. Figure S1 ##########
 
-png("Plots/figure_S1.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S1.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -608,7 +608,7 @@ dev.off()
 
 ########## IX. Figure S2 ##########
 
-png("Plots/figure_S2.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S2.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -675,7 +675,7 @@ y2.range[[8]] = unlist(lapply(one8.stan, getrange))
 y2.range[[9]] = unlist(lapply(one9.stan, getrange))
 y2.range[[10]] = unlist(lapply(one10.stan, getrange))
 
-png("Plots/figure_S3.png", width = 8000, height = 4000, units = 'px', res = 600)
+jpeg("Plots/figure_S3.jpg", width = 8000, height = 4000, units = 'px', res = 600)
 par(mfrow = c(1,2))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(1, type = 'n', xlim = c(0.3,1), ylim = c(0,1), xlab = "", ylab = "Sill (normalized)", cex.lab = 2, cex.axis = 1.5)
@@ -724,7 +724,7 @@ y3.range[[9]] = unlist(lapply(two9.stan, getrange))
 y3.range[[10]] = unlist(lapply(two10.stan, getrange))
 
 # Plot normalized sill and range as a function of normalized maximum density
-png("Plots/figure_S4.png", width = 8000, height = 4000, units = 'px', res = 600)
+jpeg("Plots/figure_S4.jpg", width = 8000, height = 4000, units = 'px', res = 600)
 par(mfrow = c(1,2))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(1, type = 'n', xlim = c(0.6,1), ylim = c(0,1), xlab = "", ylab = "Sill (normalized)", cex.lab = 2, cex.axis = 1.5)
@@ -757,7 +757,7 @@ looic = read.table("Output/IC/looic.txt", header = T)
 one_lb = read.table("Output/IC/one_lb.txt", header = T)
 two_lb = read.table("Output/IC/two_lb.txt", header = T)
 
-png("Plots/figure_S5.png", width = 7000, height = 3500, units = 'px', res = 600)
+jpeg("Plots/figure_S5.jpg", width = 7000, height = 3500, units = 'px', res = 600)
 par(mfrow = c(1,2))
 par(mar = c(5,5,3,1), oma = c(2,2,0.5,0.5))
 plot(1, type = 'n', lwd = 2, col = lcol_peak[1], axes = F, xlab = "", ylab = "", xlim = c(2,10), ylim = c(-0.4,1), main = "2d")
@@ -801,7 +801,7 @@ dev.off()
 z.pdat = data.frame(xs = rep(seq(min(two1$xs),max(two1$xs),length.out=20),20), ys = rep(seq(min(two1$ys),max(two1$ys),length.out=20),each=20))
 
 # Plot all coordinates
-png("Plots/figure_S6.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S6.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mar = c(0,0,0,0), oma = c(8,0,0,0))
 set.panel(11,10)
 simcd(list(two1.stan[[1]],two1.stan[[2]],two1.stan[[3]],two1.stan[[4]],two1.stan[[5]],two2.stan[[1]],two2.stan[[2]],two2.stan[[3]],two2.stan[[4]],two2.stan[[5]]), two1, c(2,3,4,5,6,2,3,4,5,6), rep(T,10), 90)
@@ -843,7 +843,7 @@ dev.off()
 
 ########## XIV. Figure S7 ##########
 
-png("Plots/figure_S7.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S7.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -884,7 +884,7 @@ dev.off()
 
 ########## XV. Figure S8 ##########
 
-png("Plots/figure_S8.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S8.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -926,7 +926,7 @@ dev.off()
 ########## XVI. Figure S9 ##########
 
 # Initialize plot
-png("Plots/figure_S9.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S9.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(4,2))
 
 # Top left - all median lines for 1-d
@@ -1057,7 +1057,7 @@ lines(seq(2,10), y3.nomed, lwd = 2, lty = 3)
 legend("bottomleft", c("Sill", "Range", "Median max density"), lty = c(1,2,3), lwd = 2, bty = 'n')
 dev.off()
 
-png("Plots/nosp_twomed.png", width = 2700, height = 1800, units = 'px', res = 600)
+jpeg("Plots/nosp_twomed.jpg", width = 2700, height = 1800, units = 'px', res = 600)
 par(mar = c(0,0,0,0), oma = c(8,0,0,0))
 set.panel(2,5)
 simcd(list(no_two1.stan[[1]],no_two1.stan[[2]],no_two1.stan[[3]],no_two1.stan[[4]],no_two1.stan[[5]],no_two1.stan[[6]],no_two1.stan[[7]],no_two1.stan[[8]],no_two1.stan[[9]],nogam.two1), no_two1, seq(2,10), c(rep(T,9),F), 25)
@@ -1109,7 +1109,7 @@ for(i in 2:10) {
 }
 
 # Plot density as a function of the number of knots
-png("Plots/figure_S10.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S10.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mar = c(0,0,0,0), oma = c(8,1,5,1))
 set.panel(9,2)
 accd(baltic.grid, mu.herring[[1]], 24, 0, 80000)
@@ -1155,7 +1155,7 @@ dmv.pdat$yscale = (dmv.pdat$sYutm - mean(mab$sYutm)) / sd(mab$sYutm)
 dmv.pdat$dscale = (dmv.pdat$Depth - mean(mab$Depth)) / sd(mab$Depth)
 
 # Plot all depths
-png("Plots/figure_S10.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S11.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mfrow = c(5,2))
 par(mar = c(0,3,0,0), oma = c(6,4,0.5,0.5))
 par(mgp = c(2,1,0))
@@ -1179,7 +1179,7 @@ dev.off()
 ########## XIX. Figure S12 ##########
 
 # Plot all coordinates
-png("Plots/figure_S12.png", width = 6000, height = 9000, units = 'px', res = 600)
+jpeg("Plots/figure_S12.jpg", width = 6000, height = 9000, units = 'px', res = 600)
 par(mar = c(0,0,0,0), oma = c(8,0,0,0))
 set.panel(10,10)
 sccd(list(dmv.stan5c[[1]],dmv.stan6c[[1]],dmv.stan7c[[1]],dmv.stan8c[[1]],dmv.stan9c[[1]],dmv.stan5c[[2]],dmv.stan6c[[2]],dmv.stan7c[[2]],dmv.stan8c[[2]],dmv.stan9c[[2]]), dmv, dmv.pdat, c(5,5,5,5,5,6,6,6,6,6), c(5,6,7,8,9,5,6,7,8,9))
